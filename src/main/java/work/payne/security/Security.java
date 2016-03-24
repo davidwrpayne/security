@@ -31,12 +31,12 @@ public class Security {
     //Add configuration for all the pins.
     public void addPins(Map<String,Pin> pinMap) {
         pinMap.put("Bedroom Windows",RaspiPin.GPIO_01);
-        pinMap.put("Front Door",RaspiPin.GPIO_01);
-        pinMap.put("Back Door",RaspiPin.GPIO_01);
-        pinMap.put("Garage Door",RaspiPin.GPIO_01);
-        pinMap.put("Garage Motion Detector",RaspiPin.GPIO_01);
-        pinMap.put("Hall Motion Detector",RaspiPin.GPIO_01);
-        pinMap.put("Downstairs Bedroom Windows",RaspiPin.GPIO_01);
+//        pinMap.put("Front Door",RaspiPin.GPIO_01);
+//        pinMap.put("Back Door",RaspiPin.GPIO_01);
+//        pinMap.put("Garage Door",RaspiPin.GPIO_01);
+//        pinMap.put("Garage Motion Detector",RaspiPin.GPIO_01);
+//        pinMap.put("Hall Motion Detector",RaspiPin.GPIO_01);
+//        pinMap.put("Downstairs Bedroom Windows",RaspiPin.GPIO_01);
     }
 
     private void boot() throws InterruptedException {
