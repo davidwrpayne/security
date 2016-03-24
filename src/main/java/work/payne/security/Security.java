@@ -28,7 +28,6 @@ public class Security {
         this.addPins(pinMap);
     }
 
-
     //Add configuration for all the pins.
     public void addPins(Map<String,Pin> pinMap) {
         pinMap.put("Bedroom Windows",RaspiPin.GPIO_01);
@@ -71,7 +70,6 @@ public class Security {
     }
 
 
-
     public static void main(String args[]) {
         Security app = new Security();
         try {
@@ -82,7 +80,5 @@ public class Security {
             app.halt();
         }
     }
-
-
 
 }
