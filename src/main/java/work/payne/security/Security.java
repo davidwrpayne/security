@@ -3,6 +3,7 @@ package work.payne.security;
 import com.pi4j.io.gpio.*;
 import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
+import work.payne.security.examples.ControlGpioExample;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,11 +74,12 @@ public class Security {
     public static void main(String args[]) {
         Security app = new Security();
         try {
-            app.boot();
+//            app.boot();
+            ControlGpioExample.start();
         } catch ( Exception e ) {
             log.log(Level.SEVERE,"Application Failed!",e);
         } finally {
-            app.halt();
+//            app.halt();
         }
     }
 
