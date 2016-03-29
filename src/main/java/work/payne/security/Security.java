@@ -5,7 +5,9 @@ import com.pi4j.io.gpio.event.GpioPinDigitalStateChangeEvent;
 import com.pi4j.io.gpio.event.GpioPinListenerDigital;
 import work.payne.security.examples.ControlGpioExample;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.logging.Level;
@@ -18,51 +20,60 @@ public class Security {
     private static final Logger log= Logger.getLogger( Security.class.getName() );
 
     GpioController gpioController;
-    Map<String,Pin> pinMap;
+    ArrayList<PinTriple> pins;
     StateChangeEventHandler handler;
+    Boolean running;
+
+    static Boolean armed;
 
     Security() {
         log.info("Initializing Security Application");
         gpioController = GpioFactory.getInstance();
-        pinMap = new HashMap<String, Pin>();
-        handler = new StateChangeEventHandler();
-        this.addPins(pinMap);
+        pins = new ArrayList<>();
+        this.addPins(pins);
+
+        handler = new StateChangeEventHandler(pins);
+
+        this.running = false;
+        this.armed = false;
     }
 
     //Add configuration for all the pins.
-    public void addPins(Map<String,Pin> pinMap) {
-        pinMap.put("Bedroom Windows",RaspiPin.GPIO_01);
-//        pinMap.put("Front Door",RaspiPin.GPIO_01);
-//        pinMap.put("Back Door",RaspiPin.GPIO_01);
-//        pinMap.put("Garage Door",RaspiPin.GPIO_01);
-//        pinMap.put("Garage Motion Detector",RaspiPin.GPIO_01);
-//        pinMap.put("Hall Motion Detector",RaspiPin.GPIO_01);
-//        pinMap.put("Downstairs Bedroom Windows",RaspiPin.GPIO_01);
+    public void addPins(ArrayList<PinTriple> pins) {
+        pins.add(new PinTriple(RaspiPin.GPIO_01,1,"Bedroom Windows"));
+        pins.add(new PinTriple(RaspiPin.GPIO_04,4,"Front Door"));
+        pins.add(new PinTriple(RaspiPin.GPIO_05,5,"Back Door"));
+        pins.add(new PinTriple(RaspiPin.GPIO_06,6,"Garage Door"));
+        pins.add(new PinTriple(RaspiPin.GPIO_10,10,"Hall Motion Detector"));
+        pins.add(new PinTriple(RaspiPin.GPIO_11,11,"Garage Motion Detector"));
+//        pins.add(new PinTriple(RaspiPin.GPIO_01,1,"Bedroom Windows"));
+
     }
 
     private void boot() throws InterruptedException {
         log.info("Booting App");
+        this.running = true;
+        for (Iterator<PinTriple> i = pins.iterator(); i.hasNext(); ) {
+            PinTriple pin = i.next();
+            //
+            log.info("Setting handler for " + pin.getFriendlyName());
 
-        pinMap.forEach(new BiConsumer<String,Pin>(){
-            public void accept(String s, Pin gpioPin) {
-                //
-                log.info("Setting handler for " + s);
+            // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
+            GpioPinDigitalInput digitalInputPin = gpioController.provisionDigitalInputPin(pin.getPin(), PinPullResistance.PULL_DOWN);
 
-                // provision gpio pin #02 as an input pin with its internal pull down resistor enabled
-                GpioPinDigitalInput digitalInputPin = gpioController.provisionDigitalInputPin(gpioPin, PinPullResistance.PULL_DOWN);
+            // create and register gpio pin listener
+            digitalInputPin.addListener(new GpioPinListenerDigital() {
+                public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
+                    // display pin state on console
+                    handler.handleGPIOChange(event);
+                }
+            });
+        }
 
-                // create and register gpio pin listener
-                digitalInputPin.addListener(new GpioPinListenerDigital() {
-                    public void handleGpioPinDigitalStateChangeEvent(GpioPinDigitalStateChangeEvent event) {
-                        // display pin state on console
+        while(this.running){
+            Thread.sleep(10);
+        }
 
-                        handler.handleGPIOChange(event);
-                    }
-
-                });
-
-            }
-        });
     }
 
     private void halt() {
@@ -74,12 +85,12 @@ public class Security {
     public static void main(String args[]) {
         Security app = new Security();
         try {
-//            app.boot();
-            ControlGpioExample.start();
+            app.boot();
+//            ControlGpioExample.start();
         } catch ( Exception e ) {
             log.log(Level.SEVERE,"Application Failed!",e);
         } finally {
-//            app.halt();
+            app.halt();
         }
     }
 
